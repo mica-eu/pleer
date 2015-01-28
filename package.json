@@ -1,6 +1,6 @@
 {
   "name": "pleer",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "pleer.com api for nodejs",
   "main": "index.js",
   "scripts": {

@@ -86,7 +86,7 @@ function search(terms, opt, done) {
       var result = JSON.parse(body);
       if (!result) return done(new Error('Tracks parsing error.'));
 
-      if (result.sucess === false)
+      if (result.success === false)
         return done(null, {
           success: result.success,
           message: result.message
@@ -97,7 +97,7 @@ function search(terms, opt, done) {
           track_id: result.tracks[i].id,
           artist: result.tracks[i].artist,
           track: result.tracks[i].track,
-          length: result.tracks[i].lenght,//lenght?
+          length: result.tracks[i].lenght,
           text_id: result.tracks[i].text_id,
           bitrate: result.tracks[i].bitrate
         });
@@ -154,7 +154,7 @@ function getUrl(trackId, opt, done) {
       if (!result)
         return done(new Error('Url parsing error.'));
 
-      if (result.sucess === false)
+      if (result.success === false)
         return done(null, {
           success: result.success,
           message: result.message
@@ -201,7 +201,7 @@ function getInfo(trackId, done) {
       if (!result)
         return done(new Error('Info parsing error.'));
 
-      if (result.sucess === false)
+      if (result.success === false)
         return done(null, {
           success: result.success,
           message: result.message
@@ -265,10 +265,83 @@ function getLyrics(trackId, done) {
   });
 } // getLyrics
 
+function getTopList(opt, done) {
+  isValidToken(function(err) {
+    if (!opt && !done)
+      throw new Error('[done] is a parameter obrigatory.');
+
+    if (!done)
+      done = opt;
+
+    if (err)
+      return done(err);
+
+    var // options
+    listType = opt.listType || 1, // 1 = week | 2 = month | 3 = three months | = - six months | = - one year
+    page = opt.page || 1, // current page
+    language = opt.language || 'en'; // en | ru
+
+    var options = {
+      method: 'POST',
+      headers: {
+        'Accept': '*/*',
+        'Cache-Control': 'no-cache',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
+      },
+      uri: 'http://api.pleer.com/index.php'
+    };
+
+    options.body = 'access_token=' + encodeURIComponent(accessToken) +
+    '&method=get_top_list' +
+    '&list_type=' + listType +
+    '&page=' + page +
+    '&language=' + encodeURIComponent(language);
+
+    request(options, function (err, res, body) {
+      var tracks = [];
+
+      if (err)
+        return done(err);
+
+      if (res.statusCode !== 200)
+        return done(new Error('Error in get track info.'));
+
+      var result = JSON.parse(body);
+      if (!result)
+        return done(new Error('Response parsing error.'));
+
+      if (result.success === false)
+        return done(null, {
+          success: result.success,
+          message: result.message
+        });
+
+      for (var i in result.tracks.data) {
+        tracks.push({
+          track_id: result.tracks.data[i].id,
+          artist: result.tracks.data[i].artist,
+          track: result.tracks.data[i].track,
+          length: result.tracks.data[i].lenght,
+          text_id: result.tracks.data[i].text_id,
+          bitrate: result.tracks.data[i].bitrate,
+          position: result.tracks.data[i].position
+        });
+      }
+
+      done(null, {
+        sucess: result.success,
+        count: result.tracks.count,
+        tracks: tracks
+      });
+    });
+  });
+} // getTopList
+
 
 module.exports = {
   search: search,
   getUrl: getUrl,
   getInfo: getInfo,
-  getLyrics: getLyrics
+  getLyrics: getLyrics,
+  getTopList: getTopList
 };
