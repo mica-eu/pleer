@@ -3,7 +3,7 @@ var request = require('request'),
   tokenExpireTime;
 
 function isValidToken(done) {
-  if (!tokenExpireTime || !tokenExpireTime < (new Date()).getTime())
+  if (!tokenExpireTime || tokenExpireTime < (new Date()).getTime())
     tokenRequest(done);
   else
     done(null);
