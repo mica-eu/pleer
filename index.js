@@ -224,9 +224,51 @@ function getInfo(trackId, done) {
   });
 } // getInfo
 
+function getLyrics(trackId, done) {
+  isValidToken(function(err) {
+    if (!trackId)
+      throw new Error('[trackId] is a parameter obrigatory.');
+
+    if (!done)
+      throw new Error('[done] is a parameter obrigatory.');
+
+    if (err)
+      return done(err);
+
+    var options = {
+      method: 'POST',
+      headers: {
+        'Accept': '*/*',
+        'Cache-Control': 'no-cache',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
+      },
+      uri: 'http://api.pleer.com/index.php'
+    };
+
+    options.body = 'access_token=' + encodeURIComponent(accessToken) +
+    '&method=tracks_get_lyrics' +
+    '&track_id=' + encodeURIComponent(trackId);
+
+    request(options, function (err, res, body) {
+      if (err)
+        return done(err);
+
+      if (res.statusCode !== 200)
+        return done(new Error('Error in get track info.'));
+
+      var result = JSON.parse(body);
+      if (!result)
+        return done(new Error('Info parsing error.'));
+
+      done(null, result);
+    });
+  });
+} // getLyrics
+
 
 module.exports = {
   search: search,
   getUrl: getUrl,
-  getInfo: getInfo
+  getInfo: getInfo,
+  getLyrics: getLyrics
 };
