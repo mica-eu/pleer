@@ -337,11 +337,55 @@ function getTopList(opt, done) {
   });
 } // getTopList
 
+function getSuggest(part, done) {
+  isValidToken(function(err) {
+    if (!part)
+      throw new Error('[part] is a parameter obrigatory.');
+
+    if (!done)
+      throw new Error('[done] is a parameter obrigatory.');
+
+    if (err)
+      return done(err);
+
+    var options = {
+      method: 'POST',
+      headers: {
+        'Accept': '*/*',
+        'Cache-Control': 'no-cache',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
+      },
+      uri: 'http://api.pleer.com/index.php'
+    };
+
+    options.body = 'access_token=' + encodeURIComponent(accessToken) +
+    '&method=get_suggest' +
+    '&part=' + encodeURIComponent(part);
+
+    request(options, function (err, res, body) {
+      var tracks = [];
+
+      if (err)
+        return done(err);
+
+      if (res.statusCode !== 200)
+        return done(new Error('Error in get suggest.'));
+
+      var result = JSON.parse(body);
+      if (!result)
+        return done(new Error('Response parsing error.'));
+
+      done(null, result);
+    });
+  });
+} // getSuggest
+
 
 module.exports = {
   search: search,
   getUrl: getUrl,
   getInfo: getInfo,
   getLyrics: getLyrics,
-  getTopList: getTopList
+  getTopList: getTopList,
+  getSuggest: getSuggest
 };
