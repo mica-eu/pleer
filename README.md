@@ -2,7 +2,8 @@
 pleer.com api for nodejs
 
 ## Installation
-  $ npm install pleer
+
+    $ npm install pleer
 
 ## Use
 ```javascript
